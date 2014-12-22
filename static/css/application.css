@@ -1,0 +1,80 @@
+.landing{
+	margin-top:20% !important;
+}
+
+#floater{
+	z-index:-2;
+	opacity:0.8;
+	position: fixed;
+	top:33%;
+	left:33%;
+}
+
+.nav,.post_nav{
+	font-family:'monaco', monospace;
+	font-size: 0.7em;
+}
+
+.nav{
+	letter-spacing: 0.7em;
+}
+
+a:link,a:visited{
+	color:gray;
+}
+
+.side_links{
+	text-align:right;
+	border-right: 1px solid lightgray;
+	padding:0px 5px 20px 0px ;
+}
+
+a:active, a:hover{
+	color: #3399FF;
+}
+
+h4{
+	letter-spacing: 0.4em;
+	color: #3399FF;
+	font-family:'monaco', monospace;
+	font-size: 0.9em;
+}
+
+.footer{
+	background-color:white;
+	position:fixed;
+	bottom:10px;
+	text-align:right;
+	right:50px;
+}
+
+.posts_title{
+	text-align:right;
+	padding:0;
+	margin:0px 0px 30px 0px;
+}
+
+.post_container{
+	border:1px solid lightgray;
+	padding:10px;
+	margin-bottom:30px;
+}
+
+.post_date{
+	font-size: 0.7em;
+	color:#565656;
+	margin:none;
+	padding:none;
+	display:none;
+}
+
+.post_title{
+	margin:0px 0px 15px 0px;
+	padding:none;
+	font-size:1.4em;
+}
+
+.continue{
+	font-size:0.7em;
+	text-align:right;
+}

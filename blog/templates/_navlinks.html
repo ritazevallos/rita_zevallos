@@ -1,0 +1,25 @@
+<a class="nav" href="{% url projects %}"><u>p</u>rojects</a>
+<a class="nav" href="{% url stories %}"><u>s</u>tories</a>
+<a class="nav" href="{% url thoughts %}"><u>t</u>houghts</a>
+<a class="nav" href="{% url about %}"><u>a</u>bout</a>
+<a class="nav" href="{% url all_external %}"><u>idea</u> book</a>
+
+<div class="ui-widget">
+  <label for="nodes">Search: </label>
+  <input id="nodes">
+</div>
+
+<script>
+
+    //http://code.tutsplus.com/tutorials/how-to-use-the-jquery-ui-autocomplete-widget--net-10560
+
+    $(function() {
+      $("#nodes").autocomplete({
+        source: "/autocomplete_nodes/",
+        minLength: 2,
+        onSelect: function (suggestion) {
+            alert('You selected: ' + suggestion.value + ', ' + suggestion.data);
+        }
+      });
+    });
+</script>

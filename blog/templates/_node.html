@@ -1,0 +1,12 @@
+<div class="post_container">
+
+	<div class="post_title">{% if node.external %}<a href="{{node.link}}">{% endif %}{{node.title}}{% if node.external %}</a>{% endif %}</div>
+	<div>
+		{{node.excerpt|linebreaks}}
+		{% if node.is_long %}
+        	<div class="continue">
+        		<a href="{% url node node.id %}">~continue reading~</a>
+        	</div>
+    	{% endif %}
+	</div>
+</div>

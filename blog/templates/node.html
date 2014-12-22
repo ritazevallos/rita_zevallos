@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="post_container">
+
+	<div class="post_title">{% if node.external %}<a href="{{node.link}}">{{node.title}}</a>{% endif %}</div>
+	<!-- FYI if I forget again, this isn't showing up because I CSS'ed it invisible for when they're in path's-->
+	<div>
+		{{node.text|linebreaks}}
+	</div>
+</div>
+
+{% endblock %}
