@@ -38,30 +38,35 @@ function initScene() {
 }
 
 function initLabyrinthTiling(){
-    triangles = []
-    iterations = 1;
-    vertices = [];
+    labryinth_lines = [];
+    var triangles = [];
+    var iterations = 2;
+    var vertices = [];
+    // start with equilateral triangle
     vertices.push(new THREE.Vector3(-0.5,1,0));
     vertices.push(new THREE.Vector3(0.5,1,0));
-    vertices.push(new THREE.Vector3(0,1+Math.sqrt(1.25),0));
+    vertices.push(new THREE.Vector3(0,1+Math.sqrt(0.75),0));
     triangles.push(vertices);
-    num_old_triangles = 1;
     for (var iter=0; iter<iterations; iter++){
-        new_triangles = [];
-        for (var i=triangles.length-num_old_triangles; i<triangles.length; ++i){
-            old_triangle = triangles[i];
+        var new_triangles = [];
+        for (var i=0; i<triangles.length; ++i){
+            var old_triangle = triangles[i];
+            //drawVerticesCircular(triangles[i]);
+            console.log("triangle being considered: ");
+            console.log(old_triangle);
             if (is_equilateral(old_triangle)){
-                new_triangles.push(split_equilateral(old_triangle));
+                new_triangles.push.apply(new_triangles, split_equilateral(old_triangle));
             } else if (is_isosceles(old_triangle)){
-                new_triangles.push(split_isosceles(old_triangle));
+                new_triangles.push.apply(new_triangles, split_isosceles(old_triangle));
             } else {
                 console.log("Neither equilateral nor isosceles");
-                console.log(old_triangle);
+                new_triangles.push(old_triangle);
             }
         }
-        triangles.push.apply(triangles, new_triangles);
-        num_old_triangles = new_triangles.length;
+        triangles = new_triangles;
     }
+
+    //drawVerticesCircular(triangles[1]);
 
     for (var i=0; i<triangles.length; i++){
         drawVerticesCircular(triangles[i]);
@@ -70,12 +75,13 @@ function initLabyrinthTiling(){
 }
 
 function split_equilateral(triangle_vertices){
-    x = triangle_vertices[0];
-    y = triangle_vertices[1];
-    z = triangle_vertices[2];
-    midXY = midpoint(x,y)
-    center = midpoint(midXY,z);
-    triangles = []
+    console.log("in split_equilateral");
+    var x = triangle_vertices[0];
+    var y = triangle_vertices[1];
+    var z = triangle_vertices[2];
+    var midXY = midpoint(x,y);
+    var center = midpoint(midXY,z);
+    var triangles = [];
     triangles.push([x,y,center]);
     triangles.push([x,z,center]);
     triangles.push([z,y,center]);
@@ -83,56 +89,87 @@ function split_equilateral(triangle_vertices){
 }
 
 function split_isosceles(triangle_vertices){
-    x = triangle_vertices[0];
-    y = triangle_vertices[1];
-    z = triangle_vertices[2];
-    triangles = []
+    console.log("in split_isosceles");
+    var x = triangle_vertices[0];
+    var y = triangle_vertices[1];
+    var z = triangle_vertices[2];
+    var triangles = [];
     if (x.distanceTo(y) == x.distanceTo(z)){
         // hypotenuse is y-z
-        t1= y.add(z).multiplyScalar(1/3.0);
-        t2 = y.add(z).multiplyScalar(2/3.0);
+        var thirdpoints = thirds(y,z);
+        var t1= thirdpoints[0];
+        var t2 = thirdpoints[1];
         triangles.push([x,y,t1]);
         triangles.push([x,z,t2]);
         triangles.push([x,t1,t2]);
     } else if (y.distanceTo(x) == y.distanceTo(z)){
         // hypotenuse is x-z
-        t1= x.add(z).multiplyScalar(1/3.0);
-        t2 = x.add(z).multiplyScalar(2/3.0);
+        var thirdpoints = thirds(x,z);
+        var t1= thirdpoints[0];
+        var t2 = thirdpoints[1];
         triangles.push([y,x,t1]);
         triangles.push([y,z,t2]);
         triangles.push([y,t1,t2]);
     } else if (z.distanceTo(x) == y.distanceTo(z)){
         // hypotenuse is y-x
-        t1= y.add(x).multiplyScalar(1/3.0);
-        t2 = y.add(x).multiplyScalar(2/3.0);
+        var thirdpoints = thirds(y,x);
+        var t1= thirdpoints[0];
+        var t2 = thirdpoints[1];
         triangles.push([z,y,t1]);
         triangles.push([z,x,t2]);
         triangles.push([z,t1,t2]);
     } else {
         console.log("in split_isosceles, not isosceles");
     }
-
+    console.log("\nsplit triangle");
+    console.log(triangle_vertices);
+    console.log("into");
+    console.log(triangles);
+    console.log('\n')
     return triangles;
 }
 
+function thirds(x,y){
+    var diff = new THREE.Vector3();
+    var firstamp = new THREE.Vector3();
+    var secondamp = new THREE.Vector3();
+    var firstp = new THREE.Vector3();
+    var secondp = new THREE.Vector3();
+    diff.subVectors(y,x);
+    firstamp.copy(diff).multiplyScalar(1/3.0);
+    secondamp.copy(diff).multiplyScalar(2/3.0);
+    firstp.addVectors(x,firstamp);
+    secondp.addVectors(x,secondamp);
+    return [firstp, secondp];
+}
+
 function midpoint(x,y){
-    return  x.add(y).multiplyScalar(0.5);
+    var center = new THREE.Vector3();
+    center.addVectors(x,y).multiplyScalar(0.5);
+    return center;
+}
+
+function fpEqual(a, b)
+{
+    var diff = Math.abs(a - b);
+    var epsilon = Math.max(Math.abs(a), Math.abs(b)) * Number.EPSILON;
+    return (diff < epsilon);
 }
 
 function is_equilateral(triangle_vertices){
     if (triangle_vertices.length != 3){
         throw "in is_isosceles: wrong number of vertices";
     }
-    x = triangle_vertices[0];
-    y = triangle_vertices[1];
-    z = triangle_vertices[2];
-    dxy = y.distanceTo(x);
-    dyz = y.distanceTo(z);
-    dxz = x.distanceTo(z);
-    if (dxy == dyz && dxz == dxy){
+    var x = triangle_vertices[0];
+    var y = triangle_vertices[1];
+    var z = triangle_vertices[2];
+    var dxy = y.distanceTo(x);
+    var dyz = y.distanceTo(z);
+    var dxz = x.distanceTo(z);
+    if (fpEqual(dxy,dyz) && fpEqual(dxz,dxy)){
         return true;
     } else {
-        console.log("Not equilateral. dxy = %f, dyz = %f, dxz = %f"%(dxy,dyz,dxz));
+        console.log("Not equilateral. dxy = "+dxy+", dyz = "+dyz+", dxz = "+dxz);
         return false;
     }
 }
@@ -141,12 +178,16 @@ function is_isosceles(triangle_vertices){
     if (triangle_vertices.length != 3){
         throw "in is_isosceles: wrong number of vertices";
     }
-    x = triangle_vertices[0];
-    y = triangle_vertices[1];
-    z = triangle_vertices[2];
-    if ((y.distanceTo(x) == y.distanceTo(z)) || (x.distanceTo(z) == x.distanceTo(y)) || (z.distanceTo(x) == z.distanceTo(y))){
+    var x = triangle_vertices[0];
+    var y = triangle_vertices[1];
+    var z = triangle_vertices[2];
+    var dxy = y.distanceTo(x);
+    var dyz = y.distanceTo(z);
+    var dxz = x.distanceTo(z);
+    if (fpEqual(dxy,dyz) || fpEqual(dxz,dxy) || fpEqual(dxz,dyz)) {
         return true;
     } else {
+        console.log("Not isosceles. dxy = "+dxy+", dyz = "+dyz+", dxz = "+dxz);
         return false;
     }
 }
@@ -227,8 +268,8 @@ function drawLine(a,b){
 		var lineGeometry = new THREE.Geometry();
 		lineGeometry.vertices.push(a);
 		lineGeometry.vertices.push(b);
-		line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color:0xd3d3d3}));
-		//lines.push(line);
+		var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color:0xd3d3d3}));
+		labryinth_lines.push(line);
 		scene.add(line);
 	}
 
