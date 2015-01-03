@@ -1,0 +1,120 @@
+<span class="beginning">Because </span><span class="beginning" id="begin_input" contenteditable="true"></span>
+
+<form id='begin_form' action="begin/" method="post">
+    {% csrf_token %}
+    <div class="hidden">
+    {{form.text}}
+    {{form.lat}}
+    {{form.lng}}
+    <input id="begin_submit_button" type="submit" value="Submit" />
+    </div>
+    <div id="begin_loading">Loading...</div>
+</form>
+
+<script>
+
+function isUnchangedOrEmpty2(item){
+        return (item.is(':empty') || (item.html() == default_beforeclick2) || (item.html() == default_afterclick2))
+}
+
+$(function() {
+
+    $(document).keypress(function(e) {
+        var stored_lat = $('#hidden_lat_container').text();
+        var stored_lng = $('#hidden_lng_container').text();
+        if (stored_lat != "" && stored_lng != ""){
+            $('#begin_form').find('input:eq(1)').val(stored_lat); // hacky getting inputs
+            $('#begin_form').find('input:eq(2)').val(stored_lng);
+        }
+        var this_section = $('#begin_wrapper').closest(".section");
+        if ((this_section.hasClass('active')) && (e.which == 13)) {
+            e.preventDefault();
+            var input = $('#begin_input');
+            if (isUnchangedOrEmpty2(input)){
+                footer = this_section.find('footer').first();
+                footer_html = footer.html();
+                this_section.find('footer').first().html("Write something and then press enter.");
+                //todo: have it fade in and back
+            } else {
+                $('#begin_submit_button').click();
+            }
+        }
+    });
+
+    default_beforeclick2 = "[click to write...]";
+    default_afterclick2 = "... ";
+    $("#begin_input").html(default_beforeclick2);
+    $("#begin_input").click(function(){
+        $(this).html(default_afterclick2);
+    })
+
+    $("#begin_loading").hide();
+    function block_form() {
+        $("#begin_loading").show();
+        $('textarea').attr('disabled', 'disabled');
+        $('input').attr('disabled', 'disabled');
+        $('#begin_submit_button').attr('disabled', true);
+    }
+    function unblock_form() {
+        $("#begin_loading").hide();
+        $('textarea').removeAttr('disabled');
+        $('input').removeAttr('disabled');
+        $('#begin_submit_button').removeAttr('disabled');
+    }
+    $('#begin_form').submit(function(e){
+        var $this = $(this);
+        $('#begin_form textarea:first-child').val("Because "+$('#begin_input').html());
+        $.ajax({
+            type: $(this).attr('method'),
+            data: $(this).serialize(), //get the form data
+            url: $(this).attr('action'),
+            dataType: "json",
+            success: function(response) {
+                //unblock_form();
+                $('#begin_wrapper').fadeOut('normal');
+                var this_section = $('#begin_wrapper').closest(".section");
+                this_section.removeClass('start');
+                this_section.addClass('complete');
+                $('#begin_wrapper').load("complete/"+response.beginning_id+"/");
+                $('#begin_wrapper').fadeIn('normal',function(){
+                    $.fn.fullpage.moveSectionDown();
+                });
+                $('#begin_wrapper').attr("id","complete_"+response.beginning_id+"_wrapper");
+                loadStart();
+            },
+            error: function(response) {
+                //unblock_form();
+                // render errors in form fields
+                var errors = JSON.parse(response.responseText);
+                for (error in errors){
+                    var id="#id_"+error;
+                    $(id).closest('.form-group').prepend(errors[error]);
+                }
+            }
+        })
+        $("#begin_loading").fadeIn('normal');
+        //block_form();
+        e.preventDefault();
+        return false;
+    });
+})
+</script>
+
+<style>
+
+.hidden{
+    display:none; /* dumb hack */
+}
+
+textarea{
+	display: block;
+	width: 100%;
+	padding: 6px 12px;
+	background-color: #fff;
+	background-image: none;
+	height:100px;
+	border:none;
+	overflow:visible;
+	margin:10px 10px 10px 0px;
+}
+</style>

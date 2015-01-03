@@ -1,0 +1,125 @@
+<span class="beginning">{{beginning}}</span>
+<span class="ending" id="complete_{{beginning.id}}_input" contentEditable="true"></span>
+
+<form id='complete_{{beginning.id}}_form' action="{% url complete_form beginning.id %}" method="post">
+    {% csrf_token %}
+    <div class="hidden">
+    {{form.text}}
+    {{form.beginning}}
+    {{form.lat}}
+    {{form.lng}}
+    <input id="complete_{{beginning.id}}_submit_button" type="submit" value="Submit" />
+    </div>
+    <div id="complete_{{beginning.id}}_loading" style="display:none">Loading...</div>
+</form>
+
+<script>
+
+function isUnchangedOrEmpty(item){
+    return (item.is(':empty') || (item.html() == default_beforeclick) || (item.html() == default_afterclick))
+}
+
+$(function() {
+
+    $(document).keypress(function(e) {
+        var stored_lat = $('#hidden_lat_container').text();
+        var stored_lng = $('#hidden_lng_container').text();
+        if (stored_lat != "" && stored_lng != ""){
+            $('#complete_{{beginning.id}}_form').find('input:eq(1)').val(stored_lat); // hacky getting inputs
+            $('#complete_{{beginning.id}}_form').find('input:eq(2)').val(stored_lng);
+        }
+        var this_section = $('#complete_'+{{beginning.id}}+'_wrapper').closest(".section");
+        var input = $('#complete_{{beginning.id}}_input');
+        if ((this_section.hasClass('active')) && (e.which == 13))  {
+            e.preventDefault();
+            if (isUnchangedOrEmpty(input)){
+                footer = this_section.find('footer').first();
+                footer_html = footer.html();
+                this_section.find('footer').first().html("Write something and then press enter.");
+                //todo: have it fade in and back
+            } else {
+                $('#complete_{{beginning.id}}_submit_button').click();
+            }
+        }
+    });
+
+    $("#complete_{{beginning.id}}_loading").hide();
+
+    default_beforeclick = "[click to complete...]";
+    default_afterclick = " ...";
+    $('#complete_{{beginning.id}}_input').html(default_beforeclick);
+    $('#complete_{{beginning.id}}_input').focus(function(){
+        $(this).html(default_afterclick);
+    })
+
+    function block_form() {
+        $("#complete_{{beginning.id}}_loading").show();
+        $('textarea').attr('disabled', 'disabled');
+        $('input').attr('disabled', 'disabled');
+        $('#complete_{{beginning.id}}_submit_button').attr('disabled', true);
+    }
+    function unblock_form() {
+        $("#complete_{{beginning.id}}_loading").hide();
+        $('textarea').removeAttr('disabled');
+        $('input').removeAttr('disabled');
+        $('#complete_{{beginning.id}}_submit_button').removeAttr('disabled');
+    }
+    $('#complete_{{beginning.id}}_form').submit(function(e){
+        var $this = $(this);
+
+        $('#complete_{{beginning.id}}_form textarea:first-child').val($('#complete_{{beginning.id}}_input').html());
+
+        $.ajax({
+            type: $(this).attr('method'),
+            data: $(this).serialize(), //get the form data
+            url: $(this).attr('action'),
+            dataType: "json",
+            success: function(response) {
+                unblock_form();
+                var wrapper = $('#complete_{{beginning.id}}_wrapper');
+                var this_section = wrapper.closest(".section");
+                this_section.removeClass('complete');
+                this_section.addClass('read');
+                wrapper.fadeOut('normal');
+                wrapper.load("ending/"+response.ending_id+"/");
+                this_section.find('.footer').first().remove();
+                wrapper.fadeIn('normal');
+                wrapper.attr("id","ending_"+response.ending_id+"_wrapper");
+            },
+            error: function(response) {
+                unblock_form();
+                // render errors in form fields
+                var errors = JSON.parse(response.responseText);
+                for (error in errors){
+                    var id="#id_"+error;
+                    $(id).closest('.form-group').prepend(errors[error]);
+                }
+            }
+        })
+        $("#complete_{{beginning.id}}_loading").fadeIn('normal');
+        block_form();
+        e.preventDefault();
+        return false;
+    });
+})
+</script>
+
+<style>
+
+.hidden{
+    display:none; /* dumb hack */
+}
+
+textarea{
+	display: block;
+	width: 100%;
+	padding: 6px 12px;
+	background-color: #fff;
+	background-image: none;
+	height:100px;
+	border:none;
+	overflow:visible;
+	margin:10px 10px 10px 0px;
+	color: #d3d3d3;
+}
+</style>

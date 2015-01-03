@@ -1,0 +1,39 @@
+<div id="sidebar">
+    <div id="earth_container">
+        <div id="earth_div" style="
+            left:0px;
+            top:0px;
+            bottom:0px;
+            top:0px;
+            height:200px">
+        </div>
+    </div>
+
+    <div id="options">
+        <div class="sidebar_question">
+            How would you like to play?
+        </div>
+
+        <label class="checkbox">
+          <input type="checkbox" id="startCheckbox" value="option1"> Write beginnings
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="completeCheckbox" value="option2"> Write endings
+        </label>
+        <label class="checkbox">
+          <input type="checkbox" id="readCheckbox" value="option3"> Read
+        </label>
+        <br>
+        <div class="radio">
+          <label><input type="radio" id="useGeoButton" name="optradio">Use my geolocation</label>
+        </div>
+        <div class="radio">
+          <label><input type="radio" id="useRandomGeoButton" name="optradio" checked="true">Use random geolocation</label>
+        </div>
+
+        <div id="geolocation">
+        </div>
+        <div class="hidden" id="hidden_lat_container"></div>
+        <div class="hidden" id="hidden_lng_container"></div>
+    </div>
+</div>

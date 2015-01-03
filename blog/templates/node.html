@@ -5,7 +5,7 @@
 
 	<div class="post_title">{% if node.external %}<a href="{{node.link}}">{{node.title}}</a>{% endif %}</div>
 	<!-- FYI if I forget again, this isn't showing up because I CSS'ed it invisible for when they're in path's-->
-	<div>
+	<div class="node_text">
 		{{node.text|linebreaks}}
 	</div>
 </div>

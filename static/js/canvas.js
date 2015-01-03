@@ -5,16 +5,28 @@ var origin;
 var init_angle;
 var lines;
 var shapes;
+var octree;
 
 window.onload = function() {
 initScene();
 animate();
 }
 
+function initOctree(){
+    octree = new THREE.Octree({
+        radius: 1, // optional, default = 1, octree will grow and shrink as needed
+        undeferred: false, // optional, default = false, octree will defer insertion until you call octree.update();
+        depthMax: Infinity, // optional, default = Infinity, infinite depth
+        objectsThreshold: 8, // optional, default = 8
+        overlapPct: 0.15, // optional, default = 0.15 (15%), this helps sort objects that overlap nodes
+        scene: scene // optional, pass scene as parameter only if you wish to visualize octree
+    } );
+}
+
 function initScene() {
 	scene = new THREE.Scene();
-
-	camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 0.1, 1000);
+    //initOctree();
+	camera = new THREE.PerspectiveCamera(75, window.innerWidth/window.innerHeight, 1, 4000);
 	camera.position.z = 3;
 
 	projector = new THREE.Projector();
@@ -33,27 +45,39 @@ function initScene() {
 	// so that it allow updates
 	//sphere.geometry.dynamic = true;
 
-    initLabyrinthTiling();
+    labryinth_lines = initLabyrinthTiling();
+    curr_labryinth_index_bottom = 0;
+    curr_labryinth_index_top = labryinth_lines.length;
 
 }
 
+function bigger(vertices){
+    var scale = 1.15;
+    var bigger_vertices = [];
+    vertices.forEach(function(vertex){
+        biggervertex = new THREE.Vector3();
+        biggervertex.copy(vertex);
+        biggervertex.multiplyScalar(scale);
+        bigger_vertices.push(biggervertex);
+    });
+    return bigger_vertices;
+}
+
 function initLabyrinthTiling(){
-    labryinth_lines = [];
+    labyrinth_lines = [];
     var triangles = [];
-    var iterations = 2;
+    var iterations = 7;
     var vertices = [];
     // start with equilateral triangle
-    vertices.push(new THREE.Vector3(-0.5,1,0));
-    vertices.push(new THREE.Vector3(0.5,1,0));
-    vertices.push(new THREE.Vector3(0,1+Math.sqrt(0.75),0));
+    vertices.push(new THREE.Vector3(-0.5,0,0));
+    vertices.push(new THREE.Vector3(0.5,0,0));
+    vertices.push(new THREE.Vector3(0,Math.sqrt(0.75),0));
     triangles.push(vertices);
     for (var iter=0; iter<iterations; iter++){
         var new_triangles = [];
         for (var i=0; i<triangles.length; ++i){
             var old_triangle = triangles[i];
-            //drawVerticesCircular(triangles[i]);
-            console.log("triangle being considered: ");
-            console.log(old_triangle);
+            old_triangle = bigger(old_triangle);
             if (is_equilateral(old_triangle)){
                 new_triangles.push.apply(new_triangles, split_equilateral(old_triangle));
             } else if (is_isosceles(old_triangle)){
@@ -66,21 +90,18 @@ function initLabyrinthTiling(){
         triangles = new_triangles;
     }
 
-    //drawVerticesCircular(triangles[1]);
-
     for (var i=0; i<triangles.length; i++){
-        drawVerticesCircular(triangles[i]);
+        labyrinth_lines.push.apply(drawVerticesCircular(triangles[i], true));
     }
 
+    return labyrinth_lines;
 }
 
 function split_equilateral(triangle_vertices){
-    console.log("in split_equilateral");
     var x = triangle_vertices[0];
     var y = triangle_vertices[1];
     var z = triangle_vertices[2];
-    var midXY = midpoint(x,y);
-    var center = midpoint(midXY,z);
+    var center = center_of_mass([x,y,z]);
     var triangles = [];
     triangles.push([x,y,center]);
     triangles.push([x,z,center]);
@@ -89,12 +110,11 @@ function split_equilateral(triangle_vertices){
 }
 
 function split_isosceles(triangle_vertices){
-    console.log("in split_isosceles");
     var x = triangle_vertices[0];
     var y = triangle_vertices[1];
     var z = triangle_vertices[2];
     var triangles = [];
-    if (x.distanceTo(y) == x.distanceTo(z)){
+    if (fpEqual(x.distanceTo(y),x.distanceTo(z))){
         // hypotenuse is y-z
         var thirdpoints = thirds(y,z);
         var t1= thirdpoints[0];
@@ -102,7 +122,7 @@ function split_isosceles(triangle_vertices){
         triangles.push([x,y,t1]);
         triangles.push([x,z,t2]);
         triangles.push([x,t1,t2]);
-    } else if (y.distanceTo(x) == y.distanceTo(z)){
+    } else if (fpEqual(y.distanceTo(x),y.distanceTo(z))){
         // hypotenuse is x-z
         var thirdpoints = thirds(x,z);
         var t1= thirdpoints[0];
@@ -110,7 +130,7 @@ function split_isosceles(triangle_vertices){
         triangles.push([y,x,t1]);
         triangles.push([y,z,t2]);
         triangles.push([y,t1,t2]);
-    } else if (z.distanceTo(x) == y.distanceTo(z)){
+    } else if (fpEqual(z.distanceTo(x),y.distanceTo(z))){
         // hypotenuse is y-x
         var thirdpoints = thirds(y,x);
         var t1= thirdpoints[0];
@@ -119,13 +139,8 @@ function split_isosceles(triangle_vertices){
         triangles.push([z,x,t2]);
         triangles.push([z,t1,t2]);
     } else {
-        console.log("in split_isosceles, not isosceles");
+        throw "error: in split_isosceles, but not isosceles";
     }
-    console.log("\nsplit triangle");
-    console.log(triangle_vertices);
-    console.log("into");
-    console.log(triangles);
-    console.log('\n')
     return triangles;
 }
 
@@ -143,16 +158,20 @@ function thirds(x,y){
     return [firstp, secondp];
 }
 
-function midpoint(x,y){
+function center_of_mass(vectors){
     var center = new THREE.Vector3();
-    center.addVectors(x,y).multiplyScalar(0.5);
+    vectors.forEach(function(vector) {
+        center.addVectors(center,vector);
+    });
+    center.multiplyScalar(1.0/vectors.length);
     return center;
 }
 
 function fpEqual(a, b)
 {
+    var e = 0.000001; //Number.EPSILON didn't work
     var diff = Math.abs(a - b);
-    var epsilon = Math.max(Math.abs(a), Math.abs(b)) * Number.EPSILON;
+    var epsilon = Math.max(Math.abs(a), Math.abs(b)) * e;
     return (diff < epsilon);
 }
 
@@ -166,12 +185,7 @@ function is_equilateral(triangle_vertices){
     var dxy = y.distanceTo(x);
     var dyz = y.distanceTo(z);
     var dxz = x.distanceTo(z);
-    if (fpEqual(dxy,dyz) && fpEqual(dxz,dxy)){
-        return true;
-    } else {
-        console.log("Not equilateral. dxy = "+dxy+", dyz = "+dyz+", dxz = "+dxz);
-        return false;
-    }
+    return (fpEqual(dxy,dyz) && fpEqual(dxz,dxy));
 }
 
 function is_isosceles(triangle_vertices){
@@ -184,12 +198,7 @@ function is_isosceles(triangle_vertices){
     var dxy = y.distanceTo(x);
     var dyz = y.distanceTo(z);
     var dxz = x.distanceTo(z);
-    if (fpEqual(dxy,dyz) || fpEqual(dxz,dxy) || fpEqual(dxz,dyz)) {
-        return true;
-    } else {
-        console.log("Not isosceles. dxy = "+dxy+", dyz = "+dyz+", dxz = "+dxz);
-        return false;
-    }
+    return (fpEqual(dxy,dyz) || fpEqual(dxz,dxy) || fpEqual(dxz,dyz));
 }
 
 function initSpiralTiling(){
@@ -255,28 +264,60 @@ function drawShape(){
 	}
 }
 
-function drawVerticesCircular(vertices){
+function drawVerticesCircular(vertices, labryinth){
+    shape = [];
+    labryinth = labryinth || false;
     for (var i=0; i<vertices.length-1; i++){
-		drawLine(vertices[i],vertices[i+1]);
+		line = drawLine(vertices[i],vertices[i+1],labryinth);//labryinth = true = draw labryinth
+		labyrinth_lines.push(line);
 		}
-	drawLine(vertices[0],vertices[vertices.length-1]);
+	line = drawLine(vertices[0],vertices[vertices.length-1], labryinth);
+	labyrinth_lines.push(line);
+	return shape;
 }
 
-function drawLine(a,b){
-
-	try{
-		var lineGeometry = new THREE.Geometry();
-		lineGeometry.vertices.push(a);
-		lineGeometry.vertices.push(b);
-		var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color:0xd3d3d3}));
-		labryinth_lines.push(line);
-		scene.add(line);
+function drawLine(a,b, labryinth){
+    labryinth = labryinth || false; //default value = false
+	var lineGeometry = new THREE.Geometry();
+	lineGeometry.vertices.push(a);
+	lineGeometry.vertices.push(b);
+	var line_color;
+	var grey = 0xd3d3d3;
+	var labryinth_wall = 0x0000ff;
+	var labryinth_not_wall = 0xffffff;
+	if (!labryinth){
+	    line_color = grey;
+	} else {
+	    if (vEqual(a.x,b.x) || vEqual(a.y,b.y)){
+	        p = 0.0; //0.2;//0.05; // 0.01; // 0.1 looks cool
+	        line_color = labryinth_wall;
+            if (a.y < b.y){
+                a.setY(a.y-p);
+                b.setY(b.y+p);
+            } else if (a.y > b.y){
+                a.setY(a.y+p);
+                b.setY(b.y-p);
+            }
+            else if (a.x < b.x){
+                a.setX(a.x-p);
+                b.setX(b.x+p);
+            } else if (a.x > b.x){
+                a.setX(a.x+p);
+                b.setX(b.x-p);
+            }
+	    } else {
+	        line_color = labryinth_not_wall;
+	    }
 	}
+	var line = new THREE.Line(lineGeometry, new THREE.LineBasicMaterial({color:line_color}));
+	//octree.add(line);
+	return line;
 
-	catch(err){
-		console.log('Error in drawLine: ' + err.message);
-	}
+}
 
+function vEqual(a,b){
+    var diff = Math.abs(a - b);
+    return (diff < 0.00000000001);
 }
 
 function initLight(){
@@ -304,8 +345,20 @@ function onWindowResize() {
 
 function animate() {
 	requestAnimationFrame( animate );
+    update();
 
 	render();
+}
+
+function update(){
+
+    if (curr_labryinth_index_bottom <= curr_labryinth_index_top){
+        scene.add(labryinth_lines[curr_labryinth_index_bottom]);
+        scene.add(labryinth_lines[curr_labryinth_index_top]);
+    }
+    curr_labryinth_index_bottom += 1;
+    curr_labryinth_index_top -= 1;
+
 }
 
 function render() {

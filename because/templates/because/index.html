@@ -1,0 +1,142 @@
+{% extends "because/base.html" %}
+{% block content %}
+
+<div id="uparrow">
+    &uarr;
+</div>
+
+<div id="downarrow">
+    &darr;
+</div>
+
+<div id="fullpage">
+</div>
+
+<script>
+
+function setupCheckboxHandlers(){
+    previous_start = default_start;
+    previous_complete = default_complete;
+    previous_read = default_read;
+
+    $("#startCheckbox").click(function(){
+        var $this = $(this);
+        if ($this.is(':checked')) {
+            if (!previous_start){
+                loadStart();
+                previous_start = true;
+                goToFirstOfClass('start');
+            }
+        } else {
+            if (previous_start){
+                removeAllWithClass('start');
+                previous_start = false;
+            }
+        }
+    })
+
+    $("#completeCheckbox").click(function(){
+        var $this = $(this);
+        if ($this.is(':checked')) {
+            if (!previous_complete){
+                // load beginnings
+                $.get("{% url beginnings %}",function(data,status){
+                    if (status=="success"){
+                        for (var beginning_id in data){
+                            loadComplete(parseInt(data[beginning_id]));
+                        }
+                        goToFirstOfClass('complete');
+                        previous_complete = true;
+                    } else {
+                        alert("Error loading beginnings");
+                    }
+                });
+            }
+        } else {
+            if (previous_complete){
+                removeAllWithClass('complete');
+                previous_complete = false;
+            }
+        }
+    })
+
+    $("#readCheckbox").click(function(){
+        var $this = $(this);
+        if ($this.is(':checked')) {
+            if (!previous_read){
+                // load endings
+                $.get("{% url endings %}",function(data,status){
+                    if (status=="success"){
+                        for (var ending_id in data){
+                            loadEnding(parseInt(data[ending_id]));
+                        }
+                        goToFirstOfClass('read');
+                        previous_read = true;
+                    } else {
+                        alert("Error loading endings");
+                    }
+                });
+            }
+        } else {
+            if (previous_read){
+                removeAllWithClass('read');
+                previous_read = false;
+            }
+        }
+    })
+}
+
+function loadCompletes(){
+    {% for beginning in beginnings %}
+        loadComplete({{beginning.id}});
+    {% endfor %}
+}
+
+function loadEndings(){
+    {% for ending in endings %}
+        loadEnding({{ending.id}})
+    {% endfor %}
+}
+
+/* MAIN */
+$(function() {
+    // these are global FYI
+    current_section_index = 1;
+
+    // these are also global
+    default_start = false;
+    default_complete = false;
+    default_read = true;
+
+    loadDefaultSettings();
+
+    var lat1 = 38.766794;
+    var lng1 = -77.2293805;
+    var lat2 = 38.766794;
+    var lng2 = -77.2293805;
+    loadTemplate(lat1,lng1,lat2,lng2);
+    earth = initGlobe();
+
+    if (default_start){
+        loadStart();
+    }
+    if (default_complete){
+        loadCompletes();
+    }
+    if (default_read){
+        loadEndings();
+    }
+    shuffleSections();
+    moveTemplateToTop();
+    setupCheckboxHandlers();
+    setupGeoButtonHandlers(earth);
+    setupArrowHandlers();
+
+    var marker1 = WE.marker([lat1,lng1]).addTo(earth);
+    var marker2 = WE.marker([lat2,lng2]).addTo(earth);
+    loadFullpage(earth,marker1,marker2);
+    addDataIdsToSections();
+});
+</script>
+
+{% endblock %}
