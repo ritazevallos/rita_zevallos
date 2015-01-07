@@ -1,0 +1,69 @@
+<table>
+    <tr>
+        <td class="screenshot_container">
+            <img data-project_id="1" data-selected="false" class="screenshot" src="/static/images/projects_screenshots/personal_website.png">
+        </td>
+        <td class="screenshot_container">
+            <img data-project_id="2" data-selected="false" class="screenshot" src="/static/images/projects_screenshots/because.png">
+        </td>
+    </tr>
+</table>
+
+<script>
+function showBlurb(project_id){
+    var helper_title = $('#helper').find('h5').first();
+    var helper_content = $('#helper_content');
+    switch (project_id) {
+        case 1:
+            // personal website
+            helper_title.text('Personal website');
+            helper_content.html('\
+            <p>A portfolio and journal. Will put more info here later</p>\
+            <p><a href="http://ritazevallos.pythonanywhere.com/">http://ritazevallos.pythonanywhere.com/</a></p>');
+            break;
+        case 2:
+            // because game
+            helper_title.text('The "Because" Game');
+            helper_content.html('\
+            <p>A game. Will put more info here later</p>\
+            <p><a href="http://ritazevallos.pythonanywhere.com/projects/because">http://ritazevallos.pythonanywhere.com/projects/because</a></p>');
+            break;
+    }
+}
+
+function hideBlurb(){
+    var helper = $('#helper');
+    helper.hide();
+    helper.load("helper/1",function(){
+        helper.fadeIn("fast");
+    })
+}
+
+$(function(){
+    $(".screenshot").hover(function(e){
+            debugger;
+            var project_id = $(this).data('project_id');
+            showBlurb(project_id);
+        },
+        function(e){
+            if (!$(this).data('selected')){
+                hideBlurb();
+            }
+        }
+    );
+
+    $(".screenshot").click(function(e){
+        var current = $(this);
+        current.data('selected',true);
+        $(".screenshot").each(function(i,val){
+            if ($(this) != current){
+                $(this).data('selected',false);
+            }
+        })
+        var project_id = $(this).data('project_id');
+        console.log(project_id);
+        showBlurb(project_id);
+        e.preventDefault();
+    })
+})
+</script>

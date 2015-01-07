@@ -1,6 +1,55 @@
 {% extends "because/base.html" %}
 {% block content %}
 
+<div id="info_button">i</div>
+<div id="info">
+    <p>There's this party game. Everybody sits in a circle
+    and writes half a sentence starting with "Because",
+    i.e.: "Because I woke up late..." The pieces of
+    paper are folded, collected, shuffled, and passed back out.
+    This time, on the back of the paper, each person
+    finishes the sentence with something that makes sense,
+    i.e.: "I didn't have time to take a shower."</p>
+
+    <p>Once all the sentences have been finished, the papers
+    are collected a second time and passed out. Now, one person
+    begins by reading the sentence beginning on the front,
+    and the person to their left completes it with the sentence
+    ending on the back. Going around the circle, all the mixed
+    up sentences are read in this way. The result is silly, fun,
+    and often interesting.</p>
+
+    <p>The lyrics of <i>Because</i> by the Beatles reminded me
+    of the absurdist logic that results from these sentences.
+    One of my favorite lyrics is one I misheard from this song:
+    "Because the world is round, love is old, love is new."
+    I love the idea of false causality, of absurd superstition.
+    Absurdist poetry often bothers me because it strikes me
+    as a sequence of weird and random things simply for the
+    sake of being weird and random. But the statement of causality,
+    I think, gives the two random things the structure of
+    relationship.</p>
+
+    <p>This is one of several poetry game projects I've been working
+    on. I'm interested in using the Internet as a space for distant people
+    to create art and poetry together through games like this.</p>
+
+    <p>To play, you can either finish beginnings written by others,
+    or write beginnings for other people to finish. You can read
+    completed sentences, either as they were written, or scrambled,
+    as in the party game.</p>
+
+    <p>I wanted to add the geolocation globe visualization because of
+    the idea of physical distance,
+    and also because it goes with the song :P As you scroll, the globe
+    shows you the locations of the two authors of each sentence.</p>
+
+    <p>No one knows about this project yet so there's nothing here,
+    but at some point I'll try to get my friends to play it for a few hours,
+    to populate. I was also thinking of populating using song lyrics.</p>
+
+</div>
+
 <div id="uparrow">
     &uarr;
 </div>
@@ -60,9 +109,33 @@ function setupCheckboxHandlers(){
         }
     })
 
+    $('#scrambleCheckbox').click(function(){
+        var $this = $(this);
+        if ($this.is(':checked')) {
+            // load scrambleds
+            $.get("{% url scrambled %}", function(data,status){
+                if (status=="success"){
+                    var beginning_id_list = data['beginning_id_list'];
+                    var ending_id_list = data['ending_id_list'];
+                    var num_scrambled = ending_id_list.length;
+                    if (num_scrambled != beginning_id_list.length){
+                        throw "# beginnings != #endings in scrambledCheckbox handler";
+                    } else {
+                        for (var i=0; i<num_scrambled; i++){
+                            loadScrambled(beginning_id_list[i],ending_id_list[i]);
+                        }
+                    }
+                } else {
+                    alert("Error loading scrambleds");
+                }
+            })
+        }
+    })
+
     $("#readCheckbox").click(function(){
         var $this = $(this);
         if ($this.is(':checked')) {
+                $('#scrambleCheckboxContainer').show();
             if (!previous_read){
                 // load endings
                 $.get("{% url endings %}",function(data,status){
@@ -78,6 +151,7 @@ function setupCheckboxHandlers(){
                 });
             }
         } else {
+            $('#scrambleCheckboxContainer').hide();
             if (previous_read){
                 removeAllWithClass('read');
                 previous_read = false;
@@ -98,8 +172,19 @@ function loadEndings(){
     {% endfor %}
 }
 
+function setupInfo(){
+    $('#info_button').hover(function(){
+        $('#info').show();
+    }, function(){
+        $('#info').hide();
+    })
+}
+
 /* MAIN */
 $(function() {
+
+    setupInfo();
+
     // these are global FYI
     current_section_index = 1;
 

@@ -1,9 +1,9 @@
 <div class="navdiv">
-<a class="nav" data-path_id="1" href="{% url nodes_by_path 1 %}"><u>p</u>rojects</a>
-<a class="nav" data-path_id="2" href="{% url nodes_by_path 2 %}"><u>s</u>tories</a>
-<a class="nav" data-path_id="3" href="{% url nodes_by_path 3 %}"><u>b</u>log</a>
-<a class="nav" data-path_id="4" href="{% url nodes_by_path 4 %}"><u>a</u>bout</a>
-<a class="nav" data-path_id="5" href="{% url nodes_by_path 5 %}"><u>idea</u> book</a>
+<a class="nav" data-path_id="1" href="{% url nodes_by_path 1 %}">><u>p</u>rojects</a>
+<a class="nav" data-path_id="2" href="{% url nodes_by_path 2 %}">><u>s</u>tories</a>
+<a class="nav" data-path_id="3" href="{% url nodes_by_path 3 %}">><u>b</u>log</a>
+<a class="nav" data-path_id="4" href="{% url nodes_by_path 4 %}">><u>a</u>bout</a>
+<a class="nav" data-path_id="5" href="{% url nodes_by_path 5 %}">><u>idea</u> book</a>
 </div>
 
 <!--<div class="ui-widget">-->
@@ -17,10 +17,18 @@
 
     $(function() {
         $('.nav').click(function(e){
+            var main =  $('#main');
             var path_id = $(this).data('path_id');
-            var url = "/path/"+path_id;
-            $('#main').load(url, function(){
-                $('#main').data('url',url);
+            if (path_id == 1){ // projects
+                var url = "/projects";
+            } else{
+                var url = "/path/"+path_id;
+            }
+            main.hide();
+            main.load(url, function(){
+                window.history.pushState('Complete', 'Rita Zevallos', url);
+                main.fadeIn('slow');
+                main.data('url',url);
                 if (path_id == 1){ //projects
                     $('#helper').load("helper/"+path_id);
                     $('#helper').show();

@@ -1,10 +1,12 @@
+
 <div class="content">
 	<h4>{{title}}</h4>
 </div>
-
-{% for node in nodes.object_list %}
-	{% include '_node.html' with node=node %}
-{% endfor %}
+{% if paths %}
+	{% for path in paths.object_list %}
+	    {% include 'nodes.html' with nodes=path.nodes title=path.title %}
+	{% endfor %}
+{% endif %}
 
 <div class="pagination content">
 <span class="step-links">

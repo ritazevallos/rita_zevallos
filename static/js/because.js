@@ -55,6 +55,7 @@ function loadDefaultSettings(){
     $('#startCheckbox').prop('checked', default_start);
     $('#completeCheckbox').prop('checked', default_complete);
     $('#readCheckbox').prop('checked', default_read);
+    $('#scrambleCheckbox').prop('checked', false);
 }
 
 /* would use this if you are adding more things to the list */
@@ -98,6 +99,10 @@ function loadComplete(beginning_id){
         text: "Press <Enter> to save."
     });
     loadItem("complete", 'complete_'+beginning_id+'_wrapper', "complete/"+beginning_id+"/", footer);
+}
+
+function loadScrambled(beginning_id,ending_id){
+    loadItem('read','scrambled_'+beginning_id+'_'+ending_id+'_wrapper', 'scrambled/'+beginning_id+'/'+ending_id+'/');
 }
 
 function loadEnding(ending_id){

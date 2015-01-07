@@ -4,6 +4,7 @@ from ritazevallos.because.models import Beginning, Ending
 from ritazevallos.because.forms import BeginningForm, EndingForm
 from django.utils import simplejson
 import json
+import random
 
 def index(request):
     endings = Ending.objects.all()
@@ -27,6 +28,18 @@ def beginnings(request):
     beginning_id_list = [str(id) for id in beginnings.values_list('id', flat=True)]
     return HttpResponse(json.dumps(beginning_id_list), content_type="application/json")
 
+def scrambled(request):
+    endings = Ending.objects.all()
+    beginning_id_list = [str(ending.beginning.id) for ending in endings]
+    #beginning_id_list = [str(id) for id in beginnings.values_list('id', flat=True)]
+    ending_id_list = [str(id) for id in endings.values_list('id', flat=True)]
+    random.shuffle(ending_id_list)
+    data = {
+        'beginning_id_list': beginning_id_list,
+        'ending_id_list': ending_id_list,
+        }
+    return HttpResponse(simplejson.dumps(data), content_type="application/json")
+
 def beginning(request):
     if request.method == "POST":
         form = BeginningForm(request.POST)
@@ -40,6 +53,13 @@ def beginning(request):
     else:
         form = BeginningForm()
     return render(request, "because/beginning_form.html", {'form':form})
+
+def show_scrambled(request,beginning_id,ending_id):
+    beginning = get_object_or_404(Beginning,id=beginning_id)
+    ending = get_object_or_404(Ending,id=ending_id)
+    return render(request, "because/_show.html", {
+        'beginning': beginning,
+        'ending': ending })
 
 def ending(request,ending_id):
     ending = get_object_or_404(Ending,id=ending_id)

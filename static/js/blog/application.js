@@ -71,8 +71,9 @@ function initScene(){
     window.addEventListener( 'resize', onWindowResize, false );
 
     container = $('#container');
-
+    container.hide();
     container.html(renderer.domElement);
+    container.fadeIn('slow');
 }
 
 function onMouseClick (e ){

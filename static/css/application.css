@@ -6,6 +6,14 @@
     margin-top:100px;
 }
 
+.pagination{
+    text-align:center;
+    padding:15px;
+    margin-left:33%;
+    margin-right:33%;
+    text-align:center;
+}
+
 #sidebar{
     display:none;
     position:fixed;
@@ -37,6 +45,29 @@
     margin-bottom:5px;
     font-weight:strong;
     font-style:italic;
+}
+
+#helper_footer{
+}
+
+.screenshot{
+    width:100%;
+    border:1px solid darkgrey;
+    box-shadow: 0px 0px 1px #888888;
+    background-color:#fff;
+}
+
+.screenshot:hover{
+    box-shadow: 0px 0px 5px #000;
+}
+
+#container{
+    display:none;
+}
+
+.screenshot_container{
+    width: 50%;
+    padding:20px;
 }
 
 .content{

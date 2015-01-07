@@ -2,13 +2,48 @@ body{
     font-size:18px;
 }
 
+#info_button{
+    position:fixed;
+    top:10px;
+    right:10px;
+    border: 1px solid #939393;
+    border-radius: 25px;
+    padding:0px 20px 0px 20px;
+    font-size:2em;
+    line-height:1.8em;
+    font-style:italic;
+    font-family:georgia serif;
+    opacity:0.6;
+    width: 50px;
+    z-index:2;
+    height: 50px;
+}
+
+#info_button:hover{
+    opacity:1.0;
+}
+
+#info{
+    z-index:2;
+    position:fixed;
+    top:50px;
+    right:10px;
+    display:none;
+    font-size:0.7em;
+    width:300px;
+    padding:8px;
+    background: rgba(245, 245, 245, 0.8);;
+}
+
 #uparrow,#downarrow{
     text-align:center;
     position:fixed;
     opacity:0.3;
     font-size:20px;
     z-index:2;
-    width:100%;
+    width:30px;
+    margin-left:48%;
+    margin-right:48%;
 }
 
 #uparrow{

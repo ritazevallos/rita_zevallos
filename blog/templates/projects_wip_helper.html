@@ -1,20 +1,22 @@
-<h5>Projects</h5>
+<h5>WIP Projects</h5>
 <div id="helper_content">
 Anything in here?
 </div>
 <div id="helper_footer">
-    <a id="wip_link" href="{% url nodes_by_path 1 %}">Click for my WIP projects ></a>
+    <a id="projects_link" href="{% url projects %}">Click for finished projects ></a>
 </div>
 
 <script>
-    $('#wip_link').click(function(e){
-        var url = "/path/1"; // projects
+    $('#projects_link').click(function(e){
+        var url = "/projects"; // projects
         main = $('#main');
         main.hide();
         main.load(url, function(){
             main.fadeIn('slow');
             $('#main').data('url',url);
-            $('#helper').load("helper/2");
+            $('#helper').load("helper/1");
+            $('#helper').show();
+            $('#sidebar').show();
         })
         e.preventDefault();
     })

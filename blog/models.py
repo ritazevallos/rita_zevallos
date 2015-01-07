@@ -50,6 +50,22 @@ class Node(models.Model):
         cutoff = min(len(self.text),default_cutoff)
         return self.text[:cutoff]
 
+    def convert_to_path ( self ):
+        # this should only work if there isn't already an appropriate path
+        paths_with_this_title = Path.objects.filter(title=self.title)
+        if paths_with_this_title:
+            path = paths_with_this_title[0]
+        else:
+            path = Path(title=self.title)
+            path.save()
+            rel = PathNodeRelationship(path=path, node=self, order_index=path.nodes.count())
+            rel.save()
+            for tag in self.tags.all():
+                path.tags.add(tag)
+                self.tags.remove(tag)
+            path.save()
+        return path
+
     def save(self, *args, **kwargs):
         super(Node, self).save(*args, **kwargs)
         if not self.link or self.link == "":
@@ -114,6 +130,7 @@ class Path(models.Model):
 
     title = models.CharField(max_length=200, blank=True, null=True)
     nodes = models.ManyToManyField(Node, related_name="nodes",through='PathNodeRelationship')
+    tags = models.ManyToManyField(Tag, related_name="path_tags",blank=True, null=True)
 
     def __unicode__( self ):
         if self.title:
