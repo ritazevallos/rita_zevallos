@@ -75,6 +75,9 @@ class Node(models.Model):
             for tag in self.tags.all():
                 path.tags.add(tag)
                 self.tags.remove(tag)
+            # if tag is currently in a path of its own, remove it
+            rels_with_node = PathNodeRelationship.objects.filter(node__id = self.id)
+            rels_with_node.delete()
             path.save()
         return path
 

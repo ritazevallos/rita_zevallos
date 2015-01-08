@@ -1,13 +1,11 @@
 {% extends base_template %}
 {% block content %}
 
-{% load endless %}
-
 {% include 'tag_show_page.html' with paths=paths %}
 
     <script>$.endlessPaginate({
         paginateOnScroll: true,
-            paginateOnScrollMargin: 20,
+            paginateOnScrollMargin: 100,
             paginateOnScrollChunkSize: 3,
             });
             </script>

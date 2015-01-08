@@ -122,6 +122,39 @@ def new_path(request):
     else:
         return HttpResponseRedirect(reverse('index'))
 
+def delete_node(request,node_id):
+    if request.user.is_superuser:
+        node = get_object_or_404(Node, id=node_id)
+        if node.delete():
+            success=True
+        else:
+            success=False
+        return HttpResponse(json.dumps({'success':success}), content_type="application/json")
+    else:
+        return HttpResponseRedirect(reverse('index'))
+
+def remove_node_from_path(request,path_id,node_id):
+    if request.user.is_superuser:
+        path = get_object_or_404(Path, id=path_id)
+        node = get_object_or_404(Node, id=node_id)
+        rel = get_object_or_404(PathNodeRelationship, path=path, node=node)
+        if rel.delete():
+            success=True
+        else:
+            success=False
+        return HttpResponse(json.dumps({'success':success}), content_type="application/json")
+    else:
+        return HttpResponseRedirect(reverse('index'))
+
+def helper_by_path(request,path_id):
+    path = get_object_or_404(Path, id=path_id)
+    if path.id == 1: # projects
+        return render(request, "projects_helper.html")
+    elif path.id == 2: # wip projects
+        return render(request, "projects_wip_helper.html")
+    else:
+        return render(request, "projects_helper.html")
+
 def paths_by_tag(request,tag_id):
     tag = get_object_or_404(Tag,id=tag_id)
     template = "tag_show.html"
@@ -137,27 +170,20 @@ def paths_by_tag(request,tag_id):
 	}
     return render(request, template, data)
 
-def helper_by_path(request,path_id):
-    path = get_object_or_404(Path, id=path_id)
-    if path.id == 1: # projects
-        return render(request, "projects_helper.html")
-    elif path.id == 2: # wip projects
-        return render(request, "projects_wip_helper.html")
-    else:
-        return render(request, "projects_helper.html")
-
 def nodes_by_path(request,path_id):
     path = get_object_or_404(Path, id=path_id)
+    template = "nodes.html"
     nodes = path.nodes.all()
     if request.is_ajax():
         base_template = "base_ajax.html"
     else:
         base_template = "base.html"
-    return render(request, "nodes.html", {
+    data = {
         'title': path.title,
 		'nodes': nodes,
 		'base_template': base_template
-		})
+		}
+    return render(request, template, data)
 
 def autocomplete_nodes(request):
     if request.is_ajax():
