@@ -1,3 +1,6 @@
+{% extends base_template %}
+{% block content %}
+
 {% include 'nodes_page.html' with nodes=nodes %}
 
 <script>$.endlessPaginate({
@@ -12,3 +15,5 @@ $(function(){
     $('#helper').html('<h3>{{title}}</h3>');
 })
 </script>
+
+{% endblock %}

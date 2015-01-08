@@ -1,3 +1,6 @@
+{% extends base_template %}
+{% block content %}
+
 {% load endless %}
 
 {% include 'tag_show_page.html' with paths=paths %}
@@ -13,3 +16,4 @@
         $('#helper').html("<h3>{{title}}</h3>");
     })
     </script>
+{% endblock %}

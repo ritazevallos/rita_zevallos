@@ -22,7 +22,7 @@ def convert_node_to_path(request,node_id):
     if request.user.is_superuser:
         node = get_object_or_404(Node,id=node_id)
         path = node.convert_to_path() # will either get the existent path w this name, or a new created one
-        return HttpResponseRedirect(reverse('edit_path', kwargs={'path_id': path.id}))
+        return HttpResponseRedirect(reverse('edit_path', kwargs={'path_id': path.id, 'base_template':"base.html"}))
     else:
         return HttpResponseRedirect(reverse('index'))
 
@@ -41,6 +41,7 @@ def edit_node(request, node_id):
             form = NodeForm(instance=node)
         return render(request, "node_form.html", {
             'form': form,
+            'base_template': 'base.html',
             })
     else:
         return HttpResponseRedirect(reverse('index'))
@@ -61,11 +62,12 @@ def edit_path(request, path_id):
                     pathNodeRelationship.save()
                     index += 1
                 path.save() # save the links too
-                return HttpResponseRedirect(reverse('nodes_by_path', kwargs={'path_id': path.id}))
+                return HttpResponseRedirect(reverse('nodes_by_path', kwargs={'path_id': path.id, 'base_template':'base.html'}))
         else:
             form = PathForm(instance=path)
             return render(request, "path_form.html", {
                 'form': form,
+                'base_template': 'base.html',
                 })
     else:
         return HttpResponseRedirect(reverse('index'))
@@ -87,6 +89,7 @@ def new_node(request):
             form = NodeForm()
         return render(request, "node_form.html", {
             'form': form,
+            'base_template': 'base_ajax.html',
             })
     else:
         return HttpResponseRedirect(reverse('index'))
@@ -105,11 +108,16 @@ def new_path(request):
                     pathNodeRelationship.save()
                     index += 1
                 path.save() # save the links too
-                return HttpResponseRedirect(reverse('nodes_by_path', kwargs={'path_id': path.id}))
+                kwargs = {
+                    'path_id': path.id,
+                    'base_template': 'base.html'
+                    }
+                return HttpResponseRedirect(reverse('nodes_by_path', kwargs))
         else:
             form = PathForm()
         return render(request, "path_form.html", {
             'form': form,
+            'base_template': 'base.html'
         })
     else:
         return HttpResponseRedirect(reverse('index'))
@@ -117,15 +125,17 @@ def new_path(request):
 def paths_by_tag(request,tag_id):
     tag = get_object_or_404(Tag,id=tag_id)
     template = "tag_show.html"
+    if request.is_ajax():
+        base_template = "base_ajax.html"
+    else:
+        base_template = "base.html"
     paths = Path.objects.filter(tags__id = tag.id)
     data = {
         'title': tag.name,
 		'paths': paths,
+		'base_template': base_template,
 	}
     return render(request, template, data)
-
-def paths_by_tag_page(request, tag_id):
-    return render(request, "tag_show_page.html")
 
 def helper_by_path(request,path_id):
     path = get_object_or_404(Path, id=path_id)
@@ -134,23 +144,20 @@ def helper_by_path(request,path_id):
     elif path.id == 2: # wip projects
         return render(request, "projects_wip_helper.html")
     else:
-        return render(request, "projects_helper.html") # this'll be paginator
+        return render(request, "projects_helper.html")
 
 def nodes_by_path(request,path_id):
     path = get_object_or_404(Path, id=path_id)
     nodes = path.nodes.all()
+    if request.is_ajax():
+        base_template = "base_ajax.html"
+    else:
+        base_template = "base.html"
     return render(request, "nodes.html", {
         'title': path.title,
 		'nodes': nodes,
+		'base_template': base_template
 		})
-
-def about(request):
-	tag = get_object_or_404(Tag, name="About")
-	nodes = Node.objects.filter(tags__id = tag.id)
-
-	return render(request, "nodes.html", {
-		'tag': tag,
-		'nodes': nodes,})
 
 def autocomplete_nodes(request):
     if request.is_ajax():
@@ -170,43 +177,20 @@ def autocomplete_nodes(request):
 
 def node(request, node_id):
 	node = get_object_or_404(Node, id=node_id)
-	return render(request, "node.html", { 'node': node, })
-
-def all_external(request):
-	tag = get_object_or_404(Tag, name="IdeaBook")
-	node_list = Node.objects.filter(tags__id = tag.id)
-	paginator = Paginator(node_list, 10) # Show 10 nodes per page
-	page = request.GET.get('page', '1')
-	try:
-	    nodes = paginator.page(page)
-
-        except PageNotAnInteger:
-        # If page is not an integer, deliver first page.
-            nodes = paginator.page(1)
-        except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-            nodes = paginator.page(paginator.num_pages)
-	tags = []
-	artists = get_object_or_404(Tag, name="Artists") # list external nodes
-	tags.append(artists)
-	return render(request, "nodes.html", {
-		'title': tag.name,
-		'nodes': nodes,
-		'tags': tags, })
+	if request.is_ajax():
+	    base_template = 'base_ajax.html'
+        else:
+            base_template = 'base.html'
+	return render(request, "node.html", {
+	    'node': node,
+	    'base_template': base_template,
+	    })
 
 def projects(request):
-    return render(request, "projects.html")
-
-def thoughts(request):
-	tag = get_object_or_404(Tag, name="Thoughts")
-	posts = Node.objects.filter(tags__id = tag.id)
-	return render(request, "nodes.html", {
-		'title': tag.name,
-		'nodes': posts,})
-
-def stories(request):
-	tag = get_object_or_404(Tag, name="Stories")
-	posts = Node.objects.filter(tags__id = tag.id)
-	return render(request, "nodes.html", {
-		'title': tag.name,
-		'nodes': posts,})
+    if request.is_ajax():
+        base_template = 'base_ajax.html'
+    else:
+        base_template = 'base.html'
+    return render(request, "projects.html", {
+        'base_template': base_template
+        })
