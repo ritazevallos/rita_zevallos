@@ -1,3 +1,8 @@
+from django.conf.global_settings import TEMPLATE_CONTEXT_PROCESSORS
+TEMPLATE_CONTEXT_PROCESSORS += (
+    'django.core.context_processors.request',
+)
+
 # Django settings for ritazevallos project.
 
 DEBUG = True
@@ -126,6 +131,7 @@ INSTALLED_APPS = (
     'ritazevallos.blog',
     'ritazevallos.because',
     'south',
+    'endless_pagination'
 )
 
 # A sample logging configuration. The only tangible logging

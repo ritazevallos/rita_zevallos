@@ -1,0 +1,9 @@
+{% load endless %}
+
+{% if paths %}
+    {% lazy_paginate 3 paths %}
+	{% for path in paths %}
+	    {% include 'path_preview.html' with path=path %}
+	{% endfor %}
+	{% show_more %}
+{% endif %}

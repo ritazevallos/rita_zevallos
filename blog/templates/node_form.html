@@ -1,0 +1,58 @@
+<form id="node_form" action="/node/new" method="post">
+    {% csrf_token %}
+
+    {% if form.errors %}
+        {% for error in form.non_field_errors %}
+            <div class="alert alert-error">
+                <strong>{{ error|escape }}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {{ form.as_p }}
+
+    <input id="node_form_submit" type="submit" value="Submit" />
+</form>
+
+<script>
+    $('#node_form_submit').click(function(e){
+        var form = $('#node_form');
+        $.ajax({
+            type: 'post',
+            data: form.serialize(), //get the form data
+            url: form.attr('action'),
+            dataType: "json",
+            success: function(response) {
+                var node_id = response['node_id'];
+                var node_str = response['node_str'];
+                var all_li = $('#existing_nodes_container').find('li');
+                var new_index = all_li.length;
+                var first_li = all_li.first();
+                var new_li = first_li.clone();
+                var new_id = 'id_nodes_'+new_index;
+                var label = new_li.find('label').first();
+                label.attr('for',new_id);
+                var input = new_li.find('input').first();
+                input.attr('id',new_id);
+                input.attr('value',node_id);
+                input.attr('checked','checked');
+                label.text(" "+node_str);
+                label.prepend(input);
+                first_li.before(new_li);
+                $('#new_node_wrapper').load("{% url new_node %}");
+            },
+            error: function(response) {
+                console.log('got an error!');
+                console.log(response);
+                // render errors in form fields
+                var errors = JSON.parse(response.responseText);
+                for (error in errors){
+                    var id="#id_"+error;
+                    $(id).closest('p').prepend(errors[error]);
+                }
+            }
+        })
+        e.preventDefault();
+        return false;
+    });
+</script>

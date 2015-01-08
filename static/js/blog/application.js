@@ -1,23 +1,23 @@
-        function render() {
-        	camera.lookAt( scene.position );
+function render() {
+	camera.lookAt( scene.position );
 
-        	renderer.render(scene, camera);
-        }
+	renderer.render(scene, camera);
+}
 
-        function update(){
-            var timer = Date.now() * 0.00001;
+function update(){
+    var timer = Date.now() * 0.00001;
 
-            camera.position.x = Math.cos( timer ) * 200;
-            camera.position.z = Math.sin( timer ) * 200;
-            camera.lookAt( scene.position );
-        }
+    camera.position.x = Math.cos( timer ) * 200;
+    camera.position.z = Math.sin( timer ) * 200;
+    camera.lookAt( scene.position );
+}
 
-        function animate() {
-        	requestAnimationFrame( animate );
-            update();
+function animate() {
+	requestAnimationFrame( animate );
+    update();
 
-        	render();
-        }
+	render();
+}
 
 /* sets up scene and adds the canvas to container div #container */
 function initScene(){

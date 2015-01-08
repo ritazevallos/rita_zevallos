@@ -1,12 +1,48 @@
 <div class="post_container content">
 
-	<div class="post_title">{% if node.external %}<a href="{{node.link}}">{% endif %}{{node.title}}{% if node.external %}</a>{% endif %}</div>
+	<div class="post_title">
+	    {% if node.external %}
+	    <a href="{{node.link}}">
+        {% endif %}
+
+        {% if node.title %}
+        {{node.title}}
+        {% else %}
+        [source]
+        {% endif %}
+
+        {% if node.external %}
+        </a>
+        {% endif %}
+
+        {% if user.is_superuser %}
+            <a href="{% url edit_node node.id %}">(EDIT)</a>
+            <a href="{% url convert_node_to_path node.id %}">(CONVERT)</a>
+        {% endif %}
+    </div>
+
+	{% if node.img %}
+    	<div class="node_img_container">
+    	    <img class="node_img" style="max-width: 100%" src="{{ node.img }}"/>
+    	</div>
+	{% endif %}
+
 	<div class="node_text">
-		{{node.excerpt|linebreaks}}
+		{{node.excerpt|safe|linebreaks}}
 		{% if node.is_long %}
         	<div class="continue">
-        		<a href="{% url node node.id %}">~continue reading~</a>
+        		<a class="continue_link_{{node.id}}" href="{% url node node.id %}">~continue reading~</a>
         	</div>
     	{% endif %}
 	</div>
 </div>
+
+// <script>
+    $(function(){
+        $('.continue_link_{{node.id}}').click(function(e){
+            var container = $(this).closest('.node_text');
+            container.html("{{node.text|safe|linebreaks|escapejs}}");
+            e.preventDefault();
+        })
+    })
+// </script>

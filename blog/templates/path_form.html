@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block content %}
 
+<div class="content">
 <form action="" method="post">
     {% csrf_token %}
 
@@ -18,14 +19,28 @@
         {{ form.title }}
     </div>
 
+    <h3>Add node</h3>
+    <div id="new_node_wrapper">
+        Loading node form...
+    </div>
+
     <h3>Existing nodes</h3>
-    <div class="fieldWrapper">
+    <div id="existing_nodes_container" class="fieldWrapper">
         {{ form.nodes.errors }}
         {{ form.nodes.label_tag }}
         {{ form.nodes }}
     </div>
 
+
     <input type="submit" value="Submit" />
 </form>
+</div>
+<script>
+
+$(function(){
+    var url = "{% url new_node %}";
+    $('#new_node_wrapper').load(url);
+})
+</script>
 
 {% endblock %}

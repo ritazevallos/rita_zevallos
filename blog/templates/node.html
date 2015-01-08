@@ -1,12 +1,17 @@
 {% extends "base.html" %}
 {% block content %}
 
-<div class="post_container">
+<div class="post_container content">
 
 	<div class="post_title">{% if node.external %}<a href="{{node.link}}">{{node.title}}</a>{% endif %}</div>
 	<!-- FYI if I forget again, this isn't showing up because I CSS'ed it invisible for when they're in path's-->
+	{% if node.img %}
+    	<div class="node_img_container">
+    	    <img class="node_img" style="max-width: 100%" src="{{ node.img }}"/>
+    	</div>
+	{% endif %}
 	<div class="node_text">
-		{{node.text|linebreaks}}
+		{{node.text|safe|linebreaks}}
 	</div>
 </div>
 

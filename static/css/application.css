@@ -1,3 +1,8 @@
+.node_img{
+    max-width: 100%;
+    border: 1px;
+}
+
 .landing{
 	margin-top:20% !important;
 }

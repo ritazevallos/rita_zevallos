@@ -21,14 +21,19 @@ class Tag(models.Model):
 	        for node in node_list:
 	            rel = PathNodeRelationship(path=path, node=node,order_index = path.nodes.count())
 	            rel.save()
+            path.tags.add(self)
             path.save()
+
 
 class Node(models.Model):
     title = models.CharField(max_length=200, blank=True, null=True)
     link = models.CharField(max_length=200, null=True, blank=True)
+    img = models.CharField(max_length=200, null=True, blank=True)
     text = models.TextField(null=True, blank=True)
     tags = models.ManyToManyField(Tag, related_name="post_tags",blank=True, null=True)
     date = models.DateField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     private = models.BooleanField(default=False)
     external = models.BooleanField() # automatically set if link is empty/nonempty
     links = models.ManyToManyField('self', through='Link',
@@ -40,7 +45,14 @@ class Node(models.Model):
     locationZ = models.IntegerField(blank=True, null=True)
 
     def __unicode__( self ):
-        return self.title if self.title else "No title"
+        if self.title:
+            return self.title
+        elif self.link:
+            return self.link
+        elif self.text:
+            return self.text[:1000] # for some reason self.excerpt isn't working
+        else:
+            return self.date
 
     def is_long ( self ):
         return (len(self.text) > 1000)
@@ -75,16 +87,19 @@ class Node(models.Model):
             idea_book = Tag.objects.get(name="IdeaBook")
             self.tags.add(idea_book)
 
-        if self.tags:
-            for tag in self.tags.all():
-                tag_paths = Path.objects.filter(title=tag.name) # should be 1 or 0
-                if tag_paths:
-                    tag_path = tag_paths[0]
-                else:
-                    tag_path = Path(title=tag.name)
-                rel = PathNodeRelationship(path=tag_path, node=self, order_index=tag_path.nodes.count())
-                rel.save()
-                tag_path.save() # do da links
+        # not doing this anymore because the tagpath is just going to be the default
+        # for nodes that don't belong to a path
+
+        # if self.tags:
+        #     for tag in self.tags.all():
+        #         tag_paths = Path.objects.filter(title=tag.name) # should be 1 or 0
+        #         if tag_paths:
+        #             tag_path = tag_paths[0]
+        #         else:
+        #             tag_path = Path(title=tag.name)
+        #         rel = PathNodeRelationship(path=tag_path, node=self, order_index=tag_path.nodes.count())
+        #         rel.save()
+        #         tag_path.save()
 
             # THE BELOW DOESN'T WORK ON AN UNPAID PYTHONEVERYWHERE ACCOUNT
             # import urllib
@@ -135,12 +150,18 @@ class Path(models.Model):
     def __unicode__( self ):
         if self.title:
             return self.title
-        elif self.nodes:
+        elif self.nodes and self.nodes.count > 0:
             size = self.nodes.count()
             nodes = self.nodes.all()
-            return "%s - %s (%d)"%(nodes[0],nodes[nodes.count()],size)
+            return "%s - %s (%d)"%(nodes[0],nodes[nodes.count()-1],size)
         else:
-            return "No nodes"
+            return "No title, No nodes"
+
+    def preview(self):
+        return self.nodes.all()[:1]
+
+    def larger_than_three(self):
+        return (self.nodes.count > 3)
 
     def save(self, *args, **kwargs):
         super(Path, self).save(*args, **kwargs)
@@ -169,7 +190,15 @@ class PathNodeRelationship(models.Model):
     order_index = models.IntegerField()
 
     def __unicode__(self):
-        return str(self.node) + " - " + str(self.order_index)
+        return str(self.node) + " - " + str(self.path)
+
+    def save(self, *args, **kwargs):
+        # if this node is in one of the tag_paths, remove it
+        rels = PathNodeRelationship.objects.filter(node__id=self.node.id)
+        tag_path_rels = [rel for rel in rels if rel.path.id in [1,2,3,4,5]]
+        for rel in tag_path_rels:
+            rel.delete()
+        super(PathNodeRelationship, self).save(*args, **kwargs)
 
 class Vector(object):
 

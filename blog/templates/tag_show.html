@@ -1,49 +1,15 @@
+{% load endless %}
 
-<div class="content">
-	<h4>{{title}}</h4>
-</div>
-{% if paths %}
-	{% for path in paths.object_list %}
-	    {% include 'nodes.html' with nodes=path.nodes title=path.title %}
-	{% endfor %}
-{% endif %}
+{% include 'tag_show_page.html' with paths=paths %}
 
-<div class="pagination content">
-<span class="step-links">
-    {% if nodes.has_previous %}
-        <a id="previous_page_link" href="?node_page={{ nodes.previous_page_number }}&path_page={{ paths.previous_page_number }}">previous</a>
-    {% endif %}
-
-    <span class="current">
-        Page {{ nodes.number }} of {{ nodes.paginator.num_pages }}.
-    </span>
-
-    {% if nodes.has_next %}
-        <a id="next_page_link" href="?node_page={{ nodes.next_page_number }}&path_page={{ paths.next_page_number }}">next</a>
-    {% endif %}
-</span>
-</div>
-
-<script>
-$(function(){
-    $('#previous_page_link').click(function(e){
-        var curr_url = $('#main').data('url');
-        var url = curr_url + "?page={{ nodes.previous_page_number }}";
-        $('#main').load(url,function(){
-            $('#main').data('url',url);
-            document.body.scrollTop = document.documentElement.scrollTop = 0;
-        });
-        e.preventDefault();
+    <script>$.endlessPaginate({
+        paginateOnScroll: true,
+            paginateOnScrollMargin: 20,
+            paginateOnScrollChunkSize: 3,
+            });
+            </script>
+    <script>
+    $(function(){
+        $('#helper').html("<h3>{{title}}</h3>");
     })
-
-    $('#next_page_link').click(function(e){
-        var curr_url = $('#main').data('url');
-        var url = curr_url + "?page={{ nodes.next_page_number }}";
-        $('#main').load(url,function(){
-            $('#main').data('url',url);
-            document.body.scrollTop = document.documentElement.scrollTop = 0;
-        });
-        e.preventDefault();
-    })
-})
-</script>
+    </script>

@@ -1,0 +1,6 @@
+{% load endless %}
+
+{% lazy_paginate nodes %} <!--put the 3 back ones you figure out what's wrong -->
+{% for node in nodes %}
+	{% include '_node.html' with node=node %}
+{% endfor %}

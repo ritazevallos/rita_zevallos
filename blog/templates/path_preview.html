@@ -1,0 +1,31 @@
+<h4>
+    {{path.title}}
+
+    {% if user.is_superuser %}
+    <a href="{% url edit_path path.id %}">(EDIT)</a>
+    {% endif %}
+</h4>
+
+{% for node in path.preview %}
+	{% include '_node.html' with node=node %}
+{% endfor %}
+
+{% if path.larger_than_three %}
+    <div class="continue">
+		<a id="path_{{path.id}}_page_link" href="{% url nodes_by_path path.id %}">~see more~</a>
+	</div>
+{% endif %}
+
+<script>
+$(function(){
+    $('#path_{{path.id}}_page_link').click(function(e){
+        var url = "{% url nodes_by_path path.id %}";
+        $('#main').load(url,function(){
+            window.history.pushState('Complete', 'Rita Zevallos', url);
+            $('#main').data('url',url);
+            document.body.scrollTop = document.documentElement.scrollTop = 0;
+        });
+        e.preventDefault();
+    })
+})
+</script>

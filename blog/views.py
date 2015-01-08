@@ -2,9 +2,8 @@ from django.shortcuts import render, get_object_or_404, HttpResponseRedirect, Ht
 from django.core.urlresolvers import reverse
 from ritazevallos.blog.models import Tag, Node, Path, PathNodeRelationship, Link
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from ritazevallos.blog.forms import PathForm
+from ritazevallos.blog.forms import PathForm, NodeForm
 import json
-import pdb
 from django.core import serializers
 
 def index(request):
@@ -23,7 +22,26 @@ def convert_node_to_path(request,node_id):
     if request.user.is_superuser:
         node = get_object_or_404(Node,id=node_id)
         path = node.convert_to_path() # will either get the existent path w this name, or a new created one
-        return HttpResponseRedirect(reverse('nodes_by_path', kwargs={'path_id': path.id}))
+        return HttpResponseRedirect(reverse('edit_path', kwargs={'path_id': path.id}))
+    else:
+        return HttpResponseRedirect(reverse('index'))
+
+def edit_node(request, node_id):
+    if request.user.is_superuser:
+        node = get_object_or_404(Node, id=node_id)
+        if request.method == "POST":
+            form = NodeForm(request.POST,instance=node)
+            if form.is_valid():
+                node = form.save()
+                data = { 'node_id': node.id }
+            else:
+                data = { 'errors': form.errors }
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            form = NodeForm(instance=node)
+        return render(request, "node_form.html", {
+            'form': form,
+            })
     else:
         return HttpResponseRedirect(reverse('index'))
 
@@ -52,6 +70,27 @@ def edit_path(request, path_id):
     else:
         return HttpResponseRedirect(reverse('index'))
 
+def new_node(request):
+    if request.user.is_superuser:
+        if request.method == "POST":
+            form = NodeForm(request.POST)
+            if form.is_valid():
+                node = form.save()
+                data = {
+                    'node_id': node.id,
+                    'node_str': str(node)
+                }
+            else:
+                data = { 'errors': form.errors }
+            return HttpResponse(json.dumps(data), content_type="application/json")
+        else:
+            form = NodeForm()
+        return render(request, "node_form.html", {
+            'form': form,
+            })
+    else:
+        return HttpResponseRedirect(reverse('index'))
+
 def new_path(request):
     if request.user.is_superuser:
         if request.method == "POST":
@@ -75,75 +114,18 @@ def new_path(request):
     else:
         return HttpResponseRedirect(reverse('index'))
 
-def nodes(request):
-    node_list = Node.objects.all()
-    paginator = Paginator(node_list, 10) # Show 10 nodes per page
-    page = request.GET.get('page')
-    try:
-        nodes = paginator.page(page)
-    except (PageNotAnInteger, TypeError):
-        # If page is not an integer, deliver first page.
-        nodes = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        nodes = paginator.page(paginator.num_pages)
-    # using paginator https://docs.djangoproject.com/en/dev/topics/pagination/
-    return render(request, "nodes.html", {
-	    'nodes': nodes,
-	    })
-
 def paths_by_tag(request,tag_id):
     tag = get_object_or_404(Tag,id=tag_id)
-    path_list = Path.objects.filter(tags__id = tag.id)
-    path_paginator = Paginator(path_list, 3)
-    page = request.GET.get('path_page')
-    try:
-        paths = path_paginator.page(page)
-    except (PageNotAnInteger, TypeError):
-        # If page is not an integer, deliver first page.
-        paths = path_paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        paths = path_paginator.page(path_paginator.num_pages)
-    return render(request, "tag_show.html", {
+    template = "tag_show.html"
+    paths = Path.objects.filter(tags__id = tag.id)
+    data = {
         'title': tag.name,
 		'paths': paths,
-		})
+	}
+    return render(request, template, data)
 
-# def tag(request,tag_id):
-#     tag = get_object_or_404(Tag, id=tag_id)
-#     path_list = Path.objects.filter(tags__id = tag.id)
-#     node_list = Node.objects.filter(tags__id = tag.id)
-#     for node in node_list:
-#         for path in path_list:
-#             if node in path.nodes.all():
-#                 node_list.remove(node)
-#     node_paginator = Paginator(node_list, 10) # Show 10 nodes per page
-#     path_paginator = Paginator(path_list, 3)
-#     node_page = request.GET.get('node_page')
-#     path_page = request.GET.get('path_page')
-#     try:
-#         nodes = node_paginator.page(node_page)
-#     except (PageNotAnInteger, TypeError):
-#         # If page is not an integer, deliver first page.
-#         nodes = node_paginator.page(1)
-#     except EmptyPage:
-#         # If page is out of range (e.g. 9999), deliver last page of results.
-#         nodes = node_paginator.page(node_paginator.num_pages)
-
-#     try:
-#         paths = path_paginator.page(path_page)
-#     except (PageNotAnInteger, TypeError):
-#         # If page is not an integer, deliver first page.
-#         paths = path_paginator.page(1)
-#     except EmptyPage:
-#         # If page is out of range (e.g. 9999), deliver last page of results.
-#         paths = path_paginator.page(path_paginator.num_pages)
-#     return render(request, "nodes.html", {
-#         'title': tag.name,
-# 		'nodes': nodes,
-# 		'paths': paths,
-# 		})
+def paths_by_tag_page(request, tag_id):
+    return render(request, "tag_show_page.html")
 
 def helper_by_path(request,path_id):
     path = get_object_or_404(Path, id=path_id)
@@ -156,17 +138,7 @@ def helper_by_path(request,path_id):
 
 def nodes_by_path(request,path_id):
     path = get_object_or_404(Path, id=path_id)
-    node_list = path.nodes.all()
-    paginator = Paginator(node_list, 10) # Show 10 nodes per page
-    page = request.GET.get('page')
-    try:
-        nodes = paginator.page(page)
-    except (PageNotAnInteger, TypeError):
-        # If page is not an integer, deliver first page.
-        nodes = paginator.page(1)
-    except EmptyPage:
-        # If page is out of range (e.g. 9999), deliver last page of results.
-        nodes = paginator.page(paginator.num_pages)
+    nodes = path.nodes.all()
     return render(request, "nodes.html", {
         'title': path.title,
 		'nodes': nodes,

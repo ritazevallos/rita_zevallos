@@ -9,6 +9,7 @@
     <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css">
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.8.18/themes/base/jquery-ui.css" type="text/css" media="all" />
     <script src="/static/js/jquery.min.js"></script>
+    <script src="/static/js/endless-pagination.js"></script>
     <script src="/static/js/three.min.js"></script>
     <script src="/static/js/threeoctree.min.js"></script>
     <script src="/static/js/blog/application.js"></script>
@@ -26,20 +27,25 @@
     })
     </script>
 
-    <div id="container">
-        <div id="graph_loading_text">
-        Loading graph...
-        </div>
-    </div>
     <div id="sidebar">
       {% include '_navlinks.html' %}
       <div id="helper" class="content" style="display:none">
       </div>
     </div>
 
-    <div class="col-md-6 col-md-offset-3" id="main">
-		{% block content %}{% endblock %}
-  	</div>
+    <div id="container">
+        <div id="graph_loading_text">
+        Loading graph...
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6 col-md-offset-3" id="main">
+        		{% block content %}{% endblock %}
+          	</div>
+        </div>
+    </div>
 
   </body>
 </html>
