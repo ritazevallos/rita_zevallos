@@ -94,7 +94,7 @@ bashplotlib==0.4.4
 beanstalkc==0.3.0
 beautifulsoup4==4.2.1
 biopython==1.61
-bleach==1.2.2
+bleach==3.1.1
 blinker==1.2
 boto==2.3.0
 bottle==0.11.6
