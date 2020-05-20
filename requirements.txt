@@ -167,7 +167,7 @@ grokcore.xmlrpc==1.2
 hg-git==0.4.0
 html5lib==0.95
 http-parser==0.8.1
-httplib2==0.8
+httplib2==0.18.0
 incf.countryutils==1.0
 iotop==0.6
 ipython==2.1.0
