@@ -183,7 +183,7 @@ mercurial==2.6.3
 mlpy==3.5.0
 mock==1.0.1
 mod-pywebsocket==0.6b1
-moin==1.9.7
+moin==1.9.11
 mplh5canvas==0.7
 mpmath==0.17
 mysql-connector-python==1.0.12
