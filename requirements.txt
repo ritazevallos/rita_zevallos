@@ -29,7 +29,7 @@ Genshi==0.7
 GeoIP==1.2.9
 GitPython==0.3.2.RC1
 IMAPClient==0.10.2
-Jinja2==2.7
+Jinja2==2.11.3
 Logbook==0.8.1
 Mako==0.8.1
 Markdown==2.3.1
