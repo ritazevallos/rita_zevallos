@@ -119,7 +119,7 @@ django-classy-tags==0.4
 django-cms==2.4.2
 django-mptt==0.5.5
 django-openid-auth==0.5
-django-registration==0.8
+django-registration==3.1.2
 django-sekizai==0.7
 django-social-auth==0.7.23
 django-tagging==0.3.1
