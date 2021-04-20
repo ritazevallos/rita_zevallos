@@ -76,7 +76,7 @@ WTForms==1.0.4
 Wand==0.3.8
 WeasyPrint==0.22
 WebOb==1.2.3
-Werkzeug==0.8.3
+Werkzeug==0.15.3
 Whoosh==2.4.1
 ZConfig==3.0.3
 ZEO==4.0.0b1
