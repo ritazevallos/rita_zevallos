@@ -69,7 +69,7 @@ Tempita==0.5.1
 TesseractTrainer==0.1.1
 TornadIO2==0.0.3
 Trac==1.0.1
-Twisted==13.0.0
+Twisted==20.3.0
 Unidecode==0.04.13
 VTK==5.8.0
 WTForms==1.0.4
