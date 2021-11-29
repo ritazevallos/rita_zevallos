@@ -246,7 +246,7 @@ python-dateutil==2.2
 python-gflags==2.0
 python-inotify==0.5
 python-instagram==0.8.0
-python-ldap==2.4.13
+python-ldap==3.4.0
 python-magic==0.4.3
 python-mcrypt==1.1
 python-mhash==1.4
