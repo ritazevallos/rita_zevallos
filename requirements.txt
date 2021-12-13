@@ -174,7 +174,7 @@ ipython==2.1.0
 isodate==0.4.9
 jellyfish==0.2.0
 la==0.6.0
-lxml==3.3.5
+lxml==4.6.5
 marisa-trie==0.5.1
 martian==0.14
 matplotlib==1.3.1
