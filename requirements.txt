@@ -108,7 +108,7 @@ chardet==2.2.1
 configobj==4.7.2
 coverage==3.6
 cssselect==0.8
-cvxopt==1.1.6
+cvxopt==1.2.7
 cypari==1.1
 dataset==0.4.0
 decorator==3.4.0
