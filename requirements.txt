@@ -170,7 +170,7 @@ http-parser==0.8.1
 httplib2==0.8
 incf.countryutils==1.0
 iotop==0.6
-ipython==2.1.0
+ipython==7.16.3
 isodate==0.4.9
 jellyfish==0.2.0
 la==0.6.0
