@@ -200,7 +200,7 @@ openopt==0.5402
 openpyxl==1.6.2
 oursql==0.9.3.1
 pandas==0.14.1
-paramiko==1.10.1
+paramiko==2.10.1
 patsy==0.2.1
 pdflatex==0.1.0
 pdfminer==20110515
