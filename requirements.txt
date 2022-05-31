@@ -44,7 +44,7 @@ PasteDeploy==1.5.0
 Pattern==2.6
 Pinax==0.9a2
 Pivy==0.5.0
-PyAMF==0.6.1
+PyAMF==0.8.0
 PyChart==1.39
 PyPDF2==1.23
 PySAL==1.5.0
