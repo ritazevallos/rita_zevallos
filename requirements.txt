@@ -165,7 +165,7 @@ grokcore.view==2.8
 grokcore.viewlet==1.11
 grokcore.xmlrpc==1.2
 hg-git==0.4.0
-html5lib==0.95
+html5lib==0.99999999
 http-parser==0.8.1
 httplib2==0.8
 incf.countryutils==1.0
