@@ -71,7 +71,7 @@ TornadIO2==0.0.3
 Trac==1.0.1
 Twisted==13.0.0
 Unidecode==0.04.13
-VTK==5.8.0
+VTK==9.0.1
 WTForms==1.0.4
 Wand==0.3.8
 WeasyPrint==0.22
